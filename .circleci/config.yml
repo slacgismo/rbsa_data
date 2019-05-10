@@ -7,7 +7,7 @@ jobs:
     - checkout
     - run:
         name: Run LCM processes
-        command: python7 rbsa.py
+        command: python rbsa.py
     - store_artifacts:
         path: /home/circleci/project/output
         destination: /rbsa
