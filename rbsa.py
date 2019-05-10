@@ -1,5 +1,6 @@
 import sys
-assert(sys.version_info[0]>=3 and sys.version_info[1]>=6)
+if not ( sys.version_info[0]>=3 and sys.version_info[1]>6 ):
+	raise Exception("rbsa.py: %s is not supported" % str(sys.version_info))
 import os
 import pandas as pd
 
