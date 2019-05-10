@@ -1,5 +1,5 @@
 import sys
-assert(sys.version_info>(3,6))
+assert(sys.version_info>=(3,6))
 import os
 import pandas as pd
 
