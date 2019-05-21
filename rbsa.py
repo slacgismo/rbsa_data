@@ -5,10 +5,10 @@ import os
 import pandas as pd
 
 class rbsa:
-	def __init__(self,year=1):
+	def __init__(self,year):
 		data = None
-		ncsv = [4,5]
-		for n in range(1,ncsv[year]):
+		ncsv = {1:4,2:5}
+		for n in range(1,ncsv[year]+1):
 			fn = 'data/rbsa%d-%d' % (year,n)
 			csvname = fn + '.csv'
 			if not os.path.exists(csvname):
@@ -17,12 +17,12 @@ class rbsa:
 				os.system("unzip -d data %s"%zipname)
 			print("Loading %s..."%csvname,flush=True)
 			d = pd.read_csv(csvname, index_col=['siteid','time'])
+			#print("  size: %.2f GB" % (sys.getsizeof(d)/1.0e9))
 			if type(data) == type(None):
 				data = d
 			else:
 				data = data.append(d)
 		self.data = data
 
-
-a = rbsa()
-print(a.data)
+y1 = rbsa(year=1)
+print("RBSA year 1 size: %.2f GB" % (sys.getsizeof(y1.data)/1.0e9))
