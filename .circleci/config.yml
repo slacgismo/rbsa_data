@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: slacgismo/circleci:latest
+    - image: slacgismo/circleci_python37_base:latest
     steps:
     - checkout
     - run:
