@@ -4,7 +4,7 @@ if not ( sys.version_info[0]>=3 and sys.version_info[1]>=7 ):
 try:
 	import config
 except:
-	config = {}
+	config = None
 
 def in_context(msg,level=-3):
 	call = traceback.extract_stack()[level]

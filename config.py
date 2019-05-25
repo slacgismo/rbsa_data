@@ -1,1 +1,1 @@
-debug = 10 # debug level (0 = none, 10 = all)
+debug = 0 # debug level (0 = none, 10 = all)

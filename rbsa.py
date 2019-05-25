@@ -3,6 +3,8 @@ import pandas as pd
 import utility
 import datetime
 
+#utility.config.level = 1
+
 csvfiles = {
 	2012: ['data/rbsa1-1.csv','data/rbsa1-2.csv','data/rbsa1-3.csv','data/rbsa1-4.csv'],
 	2013: ['data/rbsa2-1.csv','data/rbsa2-2.csv','data/rbsa2-3.csv','data/rbsa2-4.csv','data/rbsa2-5.csv']
@@ -19,32 +21,33 @@ class rbsa:
 				utility.message("Extracting %s..."%zipname)
 				os.system("unzip -d data %s"%zipname)
 			utility.message("Loading %s..."%csvname)
-			c = pd.read_csv(csvname, converters={"time":rbsa.get_datetime}, low_memory=True, engine="c", memory_map=True)
-			utility.debug(2,"%s is %.2f GB" % (csvname,sys.getsizeof(c)/1.0e9))
-			h = list(map(lambda x: int(x.timestamp()/3600),c["time"]))
-			ymdh = list(map(lambda x: datetime.datetime(x.year,x.month,x.day,x.hour,0,0),c["time"]))
-			hod = list(map(lambda x: x.hour,ymdh))
-			dow = list(map(lambda x: x.weekday,ymdh))
-			moy = list(map(lambda x: x.month,ymdh))
-			c.insert(0,"hour",h)
-			c.insert(1,"hod",hod)
-			c.insert(2,"dow",dow)
-			c.insert(3,"moy",moy)
-			c.set_index(["hour","siteid"],inplace=True)
-			eus = rbsa.get_enduses(c)
-			d = None
-			for eu,cols in eus.items():
-				cd = c[cols].groupby(["hour"]).sum()
-				yy = pd.DataFrame({"sites":cd.count(axis=1),eu:cd.mean(axis=1)},index=h)
-				if d is None :
-					d = yy
+			reader = pd.read_csv(csvname, converters={"time":rbsa.get_datetime}, low_memory=True, engine="c", chunksize=10000)
+			for c in reader:
+				utility.debug(2,"%s is %.2f GB" % (csvname,sys.getsizeof(c)/1.0e9))
+				h = list(map(lambda x: int(x.timestamp()/3600),c["time"]))
+				ymdh = list(map(lambda x: datetime.datetime(x.year,x.month,x.day,x.hour,0,0),c["time"]))
+				hod = list(map(lambda x: x.hour,ymdh))
+				dow = list(map(lambda x: x.weekday,ymdh))
+				moy = list(map(lambda x: x.month,ymdh))
+				c.insert(0,"hour",h)
+				c.insert(1,"hod",hod)
+				c.insert(2,"dow",dow)
+				c.insert(3,"moy",moy)
+				c.set_index(["hour","siteid"],inplace=True)
+				eus = rbsa.get_enduses(c)
+				d = None
+				for eu,cols in eus.items():
+					cd = c[cols].groupby(["hour"]).sum()
+					yy = pd.DataFrame({"sites":cd.count(axis=1),eu:cd.mean(axis=1)},index=h)
+					if d is None :
+						d = yy
+					else:
+						d.insert(len(d.columns),eu,yy[eu])
+				utility.debug(2,"dataframe is %.2f GB" % (sys.getsizeof(d)/1.0e9))
+				if type(self.data) == type(None):
+					self.data = d
 				else:
-					d.insert(len(d.columns),eu,yy[eu])
-			utility.debug(2,"dataframe is %.2f GB" % (sys.getsizeof(d)/1.0e9))
-			if type(self.data) == type(None):
-				self.data = d
-			else:
-				self.data = self.data.append(d)
+					self.data = self.data.append(d)
 		utility.debug(1,"RBSA size is %.2f GB" % (sys.getsizeof(self.data)/1.0e9))
 
 	###
