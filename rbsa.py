@@ -19,7 +19,7 @@ class rbsa:
 				utility.message("Extracting %s..."%zipname)
 				os.system("unzip -d data %s"%zipname)
 			utility.message("Loading %s..."%csvname)
-			c = pd.read_csv(csvname, converters={"time":rbsa.get_datetime})
+			c = pd.read_csv(csvname, converters={"time":rbsa.get_datetime}, low_memory=True, engine="c", memory_map=True)
 			utility.debug(2,"%s is %.2f GB" % (csvname,sys.getsizeof(c)/1.0e9))
 			h = list(map(lambda x: int(x.timestamp()/3600),c["time"]))
 			ymdh = list(map(lambda x: datetime.datetime(x.year,x.month,x.day,x.hour,0,0),c["time"]))
